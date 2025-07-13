@@ -1,0 +1,26 @@
+[
+{
+"id": 1,
+"name": "Bomber Jacket",
+"category": "Fashion",
+"price": 89.99,
+"base_description": "Classic bomber jacket with premium insulation.",
+"supported_eras": ["90s", "2000s"]
+},
+{
+"id": 2,
+"name": "Smart Glasses",
+"category": "Tech",
+"price": 149.99,
+"base_description": "Wearable smart glasses with AR capabilities.",
+"supported_eras": ["Future"]
+},
+{
+"id": 3,
+"name": "Walkman Cassette Player",
+"category": "Electronics",
+"price": 39.99,
+"base_description": "Portable music player with stereo sound.",
+"supported_eras": ["80s"]
+}
+]

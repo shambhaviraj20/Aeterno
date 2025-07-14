@@ -12,7 +12,10 @@ import ProductListing from "./pages/ProductListing";
 import ReturnsOrders from "./pages/ReturnsOrders";
 import WishlistPage from "./pages/WishlistPage";
 import Cart from "./pages/Cart"; // Import the Cart component
+import CheckoutPage from "./pages/CheckoutPage"; // Import the CheckoutPage component
 import eraThemes from "./utils/eraThemes"; // Import eraThemes for consistent styling
+import ChatbotWidget from "./components/ChatbotWidget";
+import './components/ChatbotWidget.css';  // ✅ Correct path
 
 function AnimatedRoutes({
   selectedEra,
@@ -43,42 +46,27 @@ function AnimatedRoutes({
 
   // Dummy function for placing an order
   const handlePlaceOrder = (cartItems) => {
-    if (cartItems.length === 0) {
-      alert("Your cart is empty. Add items before placing an order.");
-      return;
-    }
-
-    const newOrderId = `ORD-${Date.now()}`;
-    const newOrder = {
-      id: newOrderId,
-      date: new Date().toLocaleDateString(),
-      items: cartItems,
-      total: cartItems.reduce((acc, item) => acc + (item.price.replace('₹', '') * item.quantity || 1), 0), // Calculate total
-      status: "Pending",
-      era: selectedEra,
-    };
-
-    setOrders((prevOrders) => [...prevOrders, newOrder]);
-    setCart([]); // Clear cart after placing order
-    alert(`Order ${newOrderId} placed successfully!`);
-    console.log("Order placed:", newOrder);
+    // This function will now be primarily triggered from CheckoutPage
+    // The logic for adding to orders and clearing cart will be in CheckoutPage
+    console.log("Placing order with items:", cartItems);
   };
-
-  const currentTheme = eraThemes[selectedEra] || eraThemes["80s"];
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route
-          path="/select-era"
+          path="/"
           element={
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5 }}
             >
-              <EraSelection setSelectedEra={setSelectedEra} />
+              <EraSelection
+                selectedEra={selectedEra}
+                setSelectedEra={setSelectedEra}
+              />
             </motion.div>
           }
         />
@@ -89,28 +77,52 @@ function AnimatedRoutes({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5 }}
             >
               <ProductListing
                 selectedEra={selectedEra}
                 setSelectedEra={setSelectedEra}
+                onAddToCart={handleAddToCart}
                 onAddToWishlist={handleAddToWishlist}
-                onAddToCart={handleAddToCart} // Pass handleAddToCart from App
-                cart={cart} // Pass cart state to ProductListing
+                cart={cart}
               />
             </motion.div>
           }
         />
         <Route
-          path="/orders"
+          path="/cart"
           element={
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5 }}
             >
-              <ReturnsOrders orders={orders} selectedEra={selectedEra} />
+              <Cart
+                cart={cart}
+                setCart={setCart}
+                selectedEra={selectedEra}
+                handlePlaceOrder={handlePlaceOrder} // This will be removed or changed
+              />
+            </motion.div>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <CheckoutPage
+                cart={cart}
+                setCart={setCart}
+                orders={orders}
+                setOrders={setOrders}
+                selectedEra={selectedEra}
+              />
             </motion.div>
           }
         />
@@ -121,45 +133,30 @@ function AnimatedRoutes({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5 }}
             >
               <WishlistPage
                 wishlist={wishlist}
-                selectedEra={selectedEra}
                 onRemoveFromWishlist={handleRemoveFromWishlist}
-                onAddToCart={(product) => {
-                  // This is called from WishlistPage
-                  // Ensure this product has a quantity property for the cart
-                  handleAddToCart({ ...product, quantity: 1 });
-                  handleRemoveFromWishlist(product.id); // Optionally remove from wishlist
-                }}
+                onAddToCart={handleAddToCart}
+                selectedEra={selectedEra}
               />
             </motion.div>
           }
         />
-        {/* New Route for Cart.jsx */}
         <Route
-          path="/cart"
+          path="/returns-orders"
           element={
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5 }}
             >
-              <Cart
-                cart={cart} // Pass the cart state
-                setCart={setCart} // Pass the setCart function
-                theme={currentTheme} // Pass the current era theme for styling
-                handlePlaceOrder={handlePlaceOrder} // Pass the handlePlaceOrder function
-              />
+              <ReturnsOrders orders={orders} selectedEra={selectedEra} />
             </motion.div>
           }
         />
-        <Route path="/" element={<SplashScreen />} />{" "}
-        {/* Default route to SplashScreen */}
-        {/* Fallback route - consider a more robust solution for unknown paths */}
-        <Route path="*" element={<p>404 Not Found</p>} />
       </Routes>
     </AnimatePresence>
   );
@@ -212,6 +209,7 @@ function App() {
         setCart={setCart} // Pass setCart function
         handleAddToCart={handleAddToCart}
       />
+      <ChatbotWidget selectedEra={selectedEra} /> {/* This will show chatbot on all pages */}
     </Router>
   );
 }

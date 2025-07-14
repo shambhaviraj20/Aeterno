@@ -6,22 +6,38 @@ import { Link } from "react-router-dom";
 import eraThemes from "../utils/eraThemes";
 import productsByEra from "../utils/products";
 import ProductCard from "../components/ProductCard";
+import axios from 'axios';
 
-function ProductListing({ selectedEra, setSelectedEra, onAddToWishlist, onAddToCart, cart }) { // Add 'cart' prop
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  // const [cart, setCart] = useState([]); // Removed local cart state
-  const [showNotification, setShowNotification] = useState(false);
+function ProductListing() {
+  const [products, setProducts] = useState([])
 
-  const theme = eraThemes[selectedEra] || eraThemes["80s"];
-  const products = productsByEra[selectedEra] || [];
-  const eras = ["80s", "90s", "2000s", "Future"];
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase.from('your_table_name').select('*')
+      if (error) {
+        console.error('Error fetching products:', error)
+      } else {
+        setProducts(data)
+      }
+    }
 
-  // const handleAddToCart = (product) => { // Removed local handleAddToCart
-  //   setCart([...cart, product]);
-  //   setShowNotification(true);
-  //   setTimeout(() => setShowNotification(false), 2000);
-  // };
+    fetchProducts()
+  }, [])
+
+  return (
+    <div className="grid grid-cols-3 gap-4 p-4">
+      {products.map((product) => (
+        <div key={product.id} className="border rounded-xl p-4 shadow-lg">
+          <img src={product.image_url} alt={product.name} className="w-full h-40 object-cover rounded-md" />
+          <h2 className="text-lg font-semibold mt-2">{product.name}</h2>
+          <p className="text-gray-600">{product.description}</p>
+          <p className="font-bold mt-1">₹{product.price}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 
   const eraColors = {
     "80s": "from-rose-500 to-purple-600",
@@ -486,6 +502,6 @@ function ProductListing({ selectedEra, setSelectedEra, onAddToWishlist, onAddToC
       </main>
     </div>
   );
-}
+
 
 export default ProductListing;
